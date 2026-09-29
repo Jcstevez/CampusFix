@@ -33,7 +33,7 @@ Requisitos: **JDK 21 o superior**, **Maven 3.9+**, y [k6](https://k6.io) solo pa
 mvn test        # pruebas unitarias
 mvn verify      # unitarias + integración (H2 embebida, QR real, HTTP caja negra) + cobertura
                 # cobertura: target/site/jacoco/index.html
-mvn compile exec:java   # arranca la API en http://localhost:8080
+mvn compile exec:java   # arranca en http://localhost:8080 (abre esa direccion en el navegador: pantalla web)
 ```
 
 Carga: `powershell -ExecutionPolicy Bypass -File perf/ejecutar.ps1` (o `bash perf/ejecutar.sh`).

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CampusFix</title>
+<style>
+  :root { --azul:#0a2f6b; --naranja:#e8731a; --fondo:#f3f5f9; --tarjeta:#fff; --texto:#1c2433; --suave:#66708a; --ok:#1c8a4f; --mal:#c0392b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,Segoe UI,Roboto,sans-serif; background:var(--fondo); color:var(--texto); }
+  .app { max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; background:var(--fondo); }
+  header { background:var(--azul); color:#fff; padding:14px 16px; }
+  header h1 { margin:0; font-size:20px; } header small { opacity:.8; }
+  main { flex:1; padding:14px 14px 80px; }
+  nav { position:sticky; bottom:0; display:flex; background:#fff; border-top:1px solid #dde2ee; max-width:480px; margin:0 auto; width:100%; }
+  nav button { flex:1; padding:12px 4px; border:0; background:none; font-size:13px; color:var(--suave); cursor:pointer; }
+  nav button.on { color:var(--naranja); font-weight:700; border-top:3px solid var(--naranja); }
+  .card { background:var(--tarjeta); border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(10,47,107,.08); }
+  h2 { font-size:16px; margin:0 0 10px; }
+  label { display:block; font-size:13px; color:var(--suave); margin:8px 0 3px; }
+  input, textarea, select { width:100%; padding:10px; border:1px solid #cdd4e4; border-radius:8px; font:inherit; background:#fff; }
+  textarea { min-height:70px; resize:vertical; }
+  button.p { background:var(--naranja); color:#fff; border:0; border-radius:8px; padding:11px 14px; font:inherit; font-weight:600; cursor:pointer; margin-top:10px; width:100%; }
+  button.s { background:#fff; color:var(--azul); border:1px solid var(--azul); border-radius:8px; padding:7px 10px; font:inherit; font-size:13px; cursor:pointer; }
+  .fila { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .tag { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; color:#fff; }
+  .ALTA{background:var(--mal);} .MEDIA{background:var(--naranja);} .BAJA{background:var(--ok);}
+  .est { background:#e7ecf7; color:var(--azul); } .tec { background:#e5f1ff; color:#0b5cad; }
+  .msg { padding:10px; border-radius:8px; margin-top:10px; font-size:14px; }
+  .msg.ok { background:#e3f5ea; color:#125c34; } .msg.err { background:#fbe6e3; color:#8f2418; }
+  .objetos { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .obj { border:1px solid #dde2ee; border-radius:10px; padding:8px; text-align:center; background:#fff; cursor:pointer; }
+  .obj img { width:96px; height:96px; image-rendering:pixelated; }
+  .obj b { display:block; font-size:13px; } .obj span { font-size:11px; color:var(--suave); }
+  .obj.sel { border:2px solid var(--naranja); }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+  .chip { border:1px solid #cdd4e4; background:#fff; border-radius:20px; padding:5px 12px; font:inherit; font-size:13px; cursor:pointer; color:var(--suave); }
+  .chip.on { background:var(--azul); border-color:var(--azul); color:#fff; }
+  .filtros { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .filtros .ancho { grid-column:1 / -1; }
+  .vacio { color:var(--suave); text-align:center; padding:18px; }
+  .meta { font-size:12px; color:var(--suave); margin:4px 0; }
+  .canal { font-size:11px; font-weight:700; color:var(--azul); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header><h1>CampusFix</h1><small>Reporte de daños · App Sabana</small></header>
+  <main>
+    <!-- REPORTAR -->
+    <section id="v-reportar">
+      <div class="card">
+        <h2>Reportar con QR</h2>
+        <p class="meta">Toca el objeto para simular que escaneas su QR pegado en el campus.</p>
+        <div class="chips" id="chipsTipo">
+          <button class="chip on" data-t="">Todos</button>
+          <button class="chip" data-t="TECNOLOGIA">Tecnología</button>
+          <button class="chip" data-t="INFRAESTRUCTURA">Infraestructura</button>
+        </div>
+        <div class="objetos" id="objetos"></div>
+        <label for="salonQr">Salón (opcional)</label>
+        <input id="salonQr" placeholder="Ej: 302, Lab 101, Auditorio…">
+        <label for="descQr">¿Qué le pasa?</label>
+        <textarea id="descQr" placeholder="Ej: no enciende"></textarea>
+        <button class="p" id="btnQr">Enviar reporte con QR</button>
+        <label for="imgQr">…o sube una foto/imagen del QR</label>
+        <input type="file" id="imgQr" accept="image/*">
+        <div id="msgQr"></div>
+      </div>
+      <div class="card">
+        <h2>Reportar manualmente</h2>
+        <label for="titulo">Título</label><input id="titulo" placeholder="Ej: Proyector no enciende">
+        <label for="desc">Descripción</label><textarea id="desc" placeholder="Cuéntanos qué pasó"></textarea>
+        <label for="edif">Edificio</label>
+        <select id="edif"></select>
+        <label for="salon">Salón o espacio (escríbelo tú)</label>
+        <input id="salon" placeholder="Ej: 302, Laboratorio 101, pasillo piso 2…">
+        <button class="p" id="btnMan">Enviar reporte</button>
+        <div id="msgMan"></div>
+      </div>
+    </section>
+    <!-- INCIDENCIAS -->
+    <section id="v-incidencias" hidden>
+      <div class="card">
+        <div class="filtros">
+          <select id="filtro"><option value="">Estado: todos</option><option>ABIERTA</option><option>EN_PROCESO</option><option>ESCALADA</option><option>RESUELTA</option></select>
+          <select id="fPrio"><option value="">Prioridad: todas</option><option>ALTA</option><option>MEDIA</option><option>BAJA</option></select>
+          <select id="fTipo"><option value="">Tipo: todos</option><option value="TECNOLOGIA">Tecnología</option><option value="INFRAESTRUCTURA">Infraestructura</option></select>
+          <select id="fEdif"></select>
+          <input id="fTexto" class="ancho" placeholder="Buscar por título, descripción o salón…">
+        </div>
+        <div class="fila" style="margin-top:10px; justify-content:space-between">
+          <span class="meta" id="conteo"></span>
+          <span><button class="s" id="btnLimpiar">Limpiar</button> <button class="s" id="btnRecargar">Actualizar</button></span>
+        </div>
+      </div>
+      <div id="lista"></div>
+    </section>
+    <!-- AVISOS -->
+    <section id="v-avisos" hidden>
+      <div class="card">
+        <h2>Seguimiento</h2>
+        <p class="meta">Escala los reportes que superaron su plazo (ALTA 2 h · MEDIA 24 h · BAJA 72 h) y avisa.</p>
+        <button class="p" id="btnRevisar">Revisar pendientes ahora</button>
+        <div id="msgRev"></div>
+      </div>
+      <h2>Bandeja de correos y alertas (simulada)</h2>
+      <div id="avisos"></div>
+    </section>
+  </main>
+  <nav>
+    <button data-v="reportar" class="on">Reportar</button>
+    <button data-v="incidencias">Incidencias</button>
+    <button data-v="avisos">Avisos</button>
+  </nav>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const OBJETOS = [
+  ["PROY-B302","Proyector","Bloque B · Aula 302","TECNOLOGIA"],["PC-C101-01","Computador 01","Bloque C · Lab 101","TECNOLOGIA"],
+  ["WIFI-A2","WiFi","Bloque A · Piso 2","TECNOLOGIA"],["PUERTA-A201","Puerta","Bloque A · Aula 201","INFRAESTRUCTURA"],
+  ["LUZ-A201","Iluminación","Bloque A · Aula 201","INFRAESTRUCTURA"],["BANO-B1","Baño","Bloque B · Piso 1","INFRAESTRUCTURA"]];
+const EDIFICIOS = ["A","B","C","D","E","F","G","H","Ad Portas"];
+let objetoSel = null;
+
+function el(tag, cls, texto) { const e = document.createElement(tag); if (cls) e.className = cls; if (texto !== undefined) e.textContent = texto; return e; }
+function mensaje(id, ok, texto) { const d = $(id); d.replaceChildren(el("div", "msg " + (ok ? "ok" : "err"), texto)); }
+async function api(ruta, opciones) {
+  const r = await fetch(ruta, opciones);
+  const cuerpo = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(cuerpo.error || ("Error " + r.status));
+  return cuerpo;
+}
+const resumen = i => `Reporte ${i.id.slice(0, 8)} registrado: ${i.tipo}, prioridad ${i.prioridad}.`;
+
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  ["reportar", "incidencias", "avisos"].forEach(v => $("v-" + v).hidden = v !== b.dataset.v);
+  if (b.dataset.v === "incidencias") cargarLista();
+  if (b.dataset.v === "avisos") cargarAvisos();
+});
+
+let tipoSel = "";
+function pintarObjetos() {
+  $("objetos").replaceChildren(...OBJETOS.filter(o => !tipoSel || o[3] === tipoSel).map(([id, nombre, lugar]) => {
+    const d = el("div", "obj" + (id === objetoSel ? " sel" : ""));
+    const img = el("img"); img.src = "/qr/" + id + ".png"; img.alt = "QR de " + nombre;
+    d.append(img, el("b", "", nombre), el("span", "", lugar));
+    d.onclick = () => { objetoSel = id; pintarObjetos(); };
+    return d;
+  }));
+}
+document.querySelectorAll("#chipsTipo .chip").forEach(c => c.onclick = () => {
+  tipoSel = c.dataset.t;
+  document.querySelectorAll("#chipsTipo .chip").forEach(x => x.classList.toggle("on", x === c));
+  pintarObjetos();
+});
+pintarObjetos();
+$("edif").replaceChildren(...EDIFICIOS.map(e => { const o = el("option", "", e === "Ad Portas" ? "Ad Portas" : "Edificio " + e); o.value = e; return o; }));
+$("fEdif").replaceChildren(...[["", "Edificio: todos"], ...EDIFICIOS.map(e => [e, e === "Ad Portas" ? "Ad Portas" : "Edificio " + e])]
+  .map(([v, n]) => { const o = el("option", "", n); o.value = v; return o; }));
+
+function descripcionQr() {
+  const s = $("salonQr").value.trim(), d = $("descQr").value.trim();
+  return s ? (d ? d + " (Salón: " + s + ")" : "Salón: " + s) : d;
+}
+$("btnQr").onclick = async () => {
+  if (!objetoSel) return mensaje("msgQr", false, "Primero elige un objeto (escanea su QR).");
+  try {
+    const i = await api("/incidencias/qr", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ qr: "campusfix://objeto/" + objetoSel, descripcion: descripcionQr() }) });
+    mensaje("msgQr", true, resumen(i)); $("descQr").value = ""; $("salonQr").value = "";
+  } catch (e) { mensaje("msgQr", false, e.message); }
+};
+$("imgQr").onchange = async ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  try {
+    const i = await api("/incidencias/qr?descripcion=" + encodeURIComponent(descripcionQr()),
+      { method: "POST", headers: { "Content-Type": f.type || "image/png" }, body: f });
+    mensaje("msgQr", true, resumen(i));
+  } catch (e) { mensaje("msgQr", false, e.message); }
+  ev.target.value = "";
+};
+function ubicacionManual() {
+  const e = $("edif").value, s = $("salon").value.trim();
+  return (e === "Ad Portas" ? "Ad Portas" : "Edificio " + e) + (s ? " - Salón " + s : "");
+}
+$("btnMan").onclick = async () => {
+  try {
+    const i = await api("/incidencias", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ titulo: $("titulo").value, descripcion: $("desc").value, ubicacion: ubicacionManual() }) });
+    mensaje("msgMan", true, resumen(i)); ["titulo", "desc", "salon"].forEach(c => $(c).value = "");
+  } catch (e) { mensaje("msgMan", false, e.message); }
+};
+
+let todas = [];
+function edificioDe(u) {
+  const m = /(?:Edificio|Bloque)\s+([A-H])\b/i.exec(u || "");
+  return m ? m[1].toUpperCase() : (/ad\s*portas/i.test(u || "") ? "Ad Portas" : "");
+}
+function pintarLista() {
+  const cont = $("lista"), prio = $("fPrio").value, tipo = $("fTipo").value,
+        edif = $("fEdif").value, q = $("fTexto").value.trim().toLowerCase();
+  const datos = todas.filter(i => (!prio || i.prioridad === prio) && (!tipo || i.tipo === tipo)
+    && (!edif || edificioDe(i.ubicacion) === edif)
+    && (!q || (i.titulo + " " + i.descripcion + " " + i.ubicacion).toLowerCase().includes(q)));
+  $("conteo").textContent = datos.length + " de " + todas.length + " incidencias";
+  if (!datos.length) return cont.replaceChildren(el("div", "vacio", "No hay incidencias con esos filtros."));
+  cont.replaceChildren(...datos.map(tarjeta));
+}
+async function cargarLista() {
+  const f = $("filtro").value;
+  try {
+    todas = (await api("/incidencias" + (f ? "?estado=" + f : ""))).reverse();
+    pintarLista();
+  } catch (e) { $("lista").replaceChildren(el("div", "msg err", e.message)); }
+}
+function tarjeta(i) {
+  const c = el("div", "card");
+  const fila = el("div", "fila");
+  fila.append(el("span", "tag " + i.prioridad, i.prioridad), el("span", "tag est", i.estado),
+              el("span", "tag tec", i.tipo));
+  c.append(fila, el("h2", "", i.titulo), el("div", "", i.descripcion),
+           el("div", "meta", i.ubicacion + " · " + new Date(i.creadaEn).toLocaleString()));
+  const acc = el("div", "fila");
+  if (i.estado === "ABIERTA" || i.estado === "ESCALADA") acc.append(boton("Atender", i.id, "atender"));
+  if (i.estado !== "RESUELTA") acc.append(boton("Resolver", i.id, "resolver"));
+  if (acc.children.length) c.append(acc);
+  return c;
+}
+function boton(texto, id, accion) {
+  const b = el("button", "s", texto);
+  b.onclick = async () => { try { await api("/incidencias/" + id + "/" + accion, { method: "POST" }); cargarLista(); }
+                            catch (e) { alert(e.message); } };
+  return b;
+}
+$("filtro").onchange = cargarLista; $("btnRecargar").onclick = cargarLista;
+["fPrio", "fTipo", "fEdif"].forEach(id => $(id).onchange = pintarLista);
+$("fTexto").oninput = pintarLista;
+$("btnLimpiar").onclick = () => { ["fPrio", "fTipo", "fEdif", "fTexto"].forEach(id => $(id).value = "");
+  if ($("filtro").value) { $("filtro").value = ""; cargarLista(); } else pintarLista(); };
+
+async function cargarAvisos() {
+  const cont = $("avisos");
+  try {
+    const datos = await api("/notificaciones");
+    if (!datos.length) return cont.replaceChildren(el("div", "vacio", "Sin avisos todavía."));
+    cont.replaceChildren(...datos.reverse().map(n => {
+      const c = el("div", "card");
+      c.append(el("div", "canal", n.canal + " → " + n.destinatario), el("b", "", n.asunto), el("div", "meta", n.mensaje));
+      return c;
+    }));
+  } catch (e) { cont.replaceChildren(el("div", "msg err", e.message)); }
+}
+$("btnRevisar").onclick = async () => {
+  try { const r = await api("/seguimiento/revisar", { method: "POST" });
+        mensaje("msgRev", true, r.escaladas + " incidencia(s) escalada(s)."); cargarAvisos(); }
+  catch (e) { mensaje("msgRev", false, e.message); }
+};
+</script>
+</body>
+</html>

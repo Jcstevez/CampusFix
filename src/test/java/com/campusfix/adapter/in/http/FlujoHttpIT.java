@@ -321,6 +321,14 @@ class FlujoHttpIT {
     }
 
     @Test
+    void laRaizSirveLaPantallaWeb() {
+        var r = get("/");
+        assertEquals(200, r.statusCode());
+        assertTrue(r.headers().firstValue("Content-Type").orElse("").startsWith("text/html"));
+        assertTrue(new String(r.body(), StandardCharsets.UTF_8).contains("CampusFix"));
+    }
+
+    @Test
     void unaRutaDesconocidaDevuelveNotFound() {
         assertEquals(404, get("/no-existe").statusCode());
     }

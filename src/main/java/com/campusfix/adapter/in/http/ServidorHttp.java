@@ -33,6 +33,7 @@ import java.util.function.Supplier;
  * no contiene reglas de negocio.
  *
  * <pre>
+ * GET  /                           (pantalla web: resources/web/index.html)
  * GET  /salud
  * POST /incidencias                 {titulo, descripcion, ubicacion}
  * POST /incidencias/qr              {qr, descripcion}  |  image/png + ?descripcion=
@@ -156,6 +157,9 @@ public class ServidorHttp {
         String[] seg = segmentos(ex.getRequestURI().getPath());
         Map<String, String> consulta = parsearConsulta(ex.getRequestURI().getRawQuery());
 
+        if (seg.length == 0 && metodo.equals("GET")) {
+            return new Respuesta(200, "text/html; charset=utf-8", pantalla());
+        }
         if (seg.length == 1 && seg[0].equals("salud") && metodo.equals("GET")) {
             return ok(200, Map.of("estado", "ok"));
         }
@@ -175,6 +179,15 @@ public class ServidorHttp {
             return new Respuesta(200, "image/png", reportarQr.generarQrDeObjeto(objetoId));
         }
         return error(404, "Ruta no encontrada");
+    }
+
+    private static byte[] pantalla() throws IOException {
+        try (var in = ServidorHttp.class.getResourceAsStream("/web/index.html")) {
+            if (in == null) {
+                throw new IllegalStateException("Falta el recurso web/index.html");
+            }
+            return in.readAllBytes();
+        }
     }
 
     private Respuesta rutasIncidencias(
