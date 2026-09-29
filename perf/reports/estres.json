@@ -1,0 +1,172 @@
+{
+    "metrics": {
+        "http_req_sending": {
+            "max": 275.637,
+            "avg": 0.1324452398845954,
+            "med": 0,
+            "p(90)": 0.5338,
+            "p(95)": 1.1113
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 355275,
+            "thresholds": {
+                "rate<0.05": false
+            },
+            "value": 0
+        },
+        "checks": {
+            "passes": 448877,
+            "fails": 0,
+            "value": 1
+        },
+        "http_req_receiving": {
+            "avg": 0.13757258461755098,
+            "med": 0,
+            "p(90)": 0.5478,
+            "p(95)": 0.654,
+            "max": 44.1339
+        },
+        "data_received": {
+            "rate": 514719.02032467,
+            "count": 123573933
+        },
+        "vus": {
+            "value": 5,
+            "min": 2,
+            "max": 399
+        },
+        "http_req_duration": {
+            "avg": 1.291596175638601,
+            "med": 0.7975,
+            "p(90)": 2.1290600000000035,
+            "p(95)": 2.9055599999999977,
+            "max": 52921.1185
+        },
+        "http_req_duration{name:POST /incidencias}": {
+            "p(95)": 2.7239849999999994,
+            "max": 184.3417,
+            "avg": 1.179630408538283,
+            "med": 0.9498,
+            "p(90)": 1.9441900000000008,
+            "thresholds": {
+                "p(95)<=1000": false
+            }
+        },
+        "http_req_connecting": {
+            "avg": 0.1423330493279845,
+            "med": 0,
+            "p(90)": 0.5638,
+            "p(95)": 1.0272,
+            "max": 13.7988
+        },
+        "http_req_tls_handshaking": {
+            "p(90)": 0,
+            "p(95)": 0,
+            "max": 0,
+            "avg": 0,
+            "med": 0
+        },
+        "http_req_duration{name:GET /incidencias/:id}": {
+            "avg": 1.0946063354118383,
+            "med": 0.6731,
+            "p(90)": 2.283720000000001,
+            "p(95)": 3.0222,
+            "max": 116.4284,
+            "thresholds": {
+                "p(95)<=1000": false
+            }
+        },
+        "http_reqs": {
+            "count": 355275,
+            "rate": 1479.8169444509558
+        },
+        "http_req_duration{expected_response:true}": {
+            "max": 52921.1185,
+            "avg": 1.291596175638601,
+            "med": 0.7975,
+            "p(90)": 2.1290600000000035,
+            "p(95)": 2.9055599999999977
+        },
+        "vus_max": {
+            "value": 400,
+            "min": 400,
+            "max": 400
+        },
+        "iterations": {
+            "count": 187046,
+            "rate": 779.0974321068848
+        },
+        "iteration_duration": {
+            "p(90)": 205.2269,
+            "p(95)": 206.647675,
+            "max": 53126.0032,
+            "avg": 212.20298060316836,
+            "med": 202.5101
+        },
+        "http_req_waiting": {
+            "avg": 1.0215783511364427,
+            "med": 0.5683,
+            "p(90)": 1.5503,
+            "p(95)": 2.1555,
+            "max": 52921.1185
+        },
+        "data_sent": {
+            "count": 59406327,
+            "rate": 247443.49954878422
+        },
+        "http_req_duration{name:POST /incidencias/qr}": {
+            "med": 0.9514,
+            "p(90)": 1.9346,
+            "p(95)": 2.7047699999999986,
+            "max": 52921.1185,
+            "avg": 1.7583957942725137,
+            "thresholds": {
+                "p(95)<=1000": false
+            }
+        },
+        "http_req_blocked": {
+            "p(95)": 1.146,
+            "max": 19.3396,
+            "avg": 0.23401612666244806,
+            "med": 0,
+            "p(90)": 1.028
+        }
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "POST /incidencias -> 201": {
+                    "fails": 0,
+                    "name": "POST /incidencias -> 201",
+                    "path": "::POST /incidencias -> 201",
+                    "id": "491d0e1749d6566e6775497958a3af54",
+                    "passes": 93602
+                },
+                "trae tipo y prioridad": {
+                    "id": "cf82c0ae3e1f987ffcb5bd78f5662a32",
+                    "passes": 93602,
+                    "fails": 0,
+                    "name": "trae tipo y prioridad",
+                    "path": "::trae tipo y prioridad"
+                },
+                "GET /incidencias/:id -> 200": {
+                    "path": "::GET /incidencias/:id -> 200",
+                    "id": "036ed3cd0d2f21d21639211b648c1927",
+                    "passes": 168229,
+                    "fails": 0,
+                    "name": "GET /incidencias/:id -> 200"
+                },
+                "POST /incidencias/qr -> 201": {
+                    "name": "POST /incidencias/qr -> 201",
+                    "path": "::POST /incidencias/qr -> 201",
+                    "id": "5a7e22414070d59001cb80978352b82d",
+                    "passes": 93444,
+                    "fails": 0
+                }
+            }
+    }
+}

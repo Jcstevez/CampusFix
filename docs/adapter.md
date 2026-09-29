@@ -286,28 +286,3 @@ La utilización de Adapter en CampusFix permite:
 
 El Adapter funciona como frontera entre el modelo interno de CampusFix y el contrato del sistema externo.
 
-```
----
-
-## 3. Guarda el archivo
-
-En VS Code:
-
-**Ctrl + S**
-
-Luego en PowerShell ejecuta:
-
-```powershell
-git status
-```
-
-Deberías ver algo parecido a:
-
-```
-Untracked files:
-    src/main/java/com/campusfix/adapter/
-    src/test/java/com/campusfix/adapter/
-    docs/adapter.md
-```
-
-Después **no hagas commit todavía**.

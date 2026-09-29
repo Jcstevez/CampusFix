@@ -4,3 +4,5 @@ target/
 .settings/
 .vscode/
 *.class
+perf/reports/app-*.log
+perf/reports/app-*.err.log

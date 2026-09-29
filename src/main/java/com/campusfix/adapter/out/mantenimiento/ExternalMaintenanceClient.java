@@ -1,4 +1,4 @@
-package com.campusfix.adapter;
+package com.campusfix.adapter.out.mantenimiento;
 
 public class ExternalMaintenanceClient {
 
@@ -8,7 +8,7 @@ public class ExternalMaintenanceClient {
     private String ultimoLugar;
     private String ultimoNivel;
 
-    public void crearTicket(
+    public synchronized void crearTicket(
             String ticketId,
             String asunto,
             String detalle,
@@ -22,23 +22,23 @@ public class ExternalMaintenanceClient {
         this.ultimoNivel = nivel;
     }
 
-    public String getUltimoTicketId() {
+    public synchronized String getUltimoTicketId() {
         return ultimoTicketId;
     }
 
-    public String getUltimoAsunto() {
+    public synchronized String getUltimoAsunto() {
         return ultimoAsunto;
     }
 
-    public String getUltimoDetalle() {
+    public synchronized String getUltimoDetalle() {
         return ultimoDetalle;
     }
 
-    public String getUltimoLugar() {
+    public synchronized String getUltimoLugar() {
         return ultimoLugar;
     }
 
-    public String getUltimoNivel() {
+    public synchronized String getUltimoNivel() {
         return ultimoNivel;
     }
 }
