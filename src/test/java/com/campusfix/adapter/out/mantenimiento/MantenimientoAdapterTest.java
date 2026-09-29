@@ -1,4 +1,4 @@
-package com.campusfix.adapter;
+package com.campusfix.adapter.out.mantenimiento;
 
 import com.campusfix.domain.incidencia.Incidencia;
 import com.campusfix.domain.incidencia.IncidenciaTecnologica;
