@@ -20,7 +20,7 @@ EXPOSE 8080
 
 # Docker consulta /salud para saber si la aplicacion esta lista
 HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=5 \
-  CMD curl -fsS http://localhost:8080/salud || exit 1
+  CMD curl -fsS http://localhost:${PORT:-8080}/salud || exit 1
 
 # La JVM usa como maximo el 75 % de la memoria del contenedor
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-cp", "app.jar:lib/*", "com.campusfix.bootstrap.CampusFixApp"]
