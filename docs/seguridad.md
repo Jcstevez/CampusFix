@@ -28,7 +28,7 @@ Contenedores: **Navegador/App Sabana** → (HTTPS) → **CampusFix (JVM, HTTP + 
 <!-- COMPLETAR tras la primera ejecución: una fila por hallazgo real de los reportes. Estados válidos: corregido / falso positivo (con justificación) / riesgo aceptado (con justificación) -->
 | Fecha | Herramienta | Hallazgo | Severidad | Estado | Justificación / commit |
 |---|---|---|---|---|---|
-| | | | | | |
+| 2026-11-16 | Grype (SCA) | Varios GHSA high en jackson-databind y jackson-core 2.16.1 | High | Corregido | Jackson 2.16.1 a 2.21.7 en pom.xml (PR #7) |
 
 ## 4. Demostración: PR inseguro bloqueado
 Se abrió un PR deliberadamente inseguro (agregando la dependencia `org.apache.logging.log4j:log4j-core:2.14.1`, vulnerable a Log4Shell CVE-2021-44228); la compuerta SCA lo bloqueó y **se cerró sin integrar**.

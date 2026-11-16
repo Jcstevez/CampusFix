@@ -60,4 +60,4 @@ k6 run -e BASE_URL=http://localhost:8080 perf/scripts/despliegue.js
 ```
 
 ## 6. Medición del pipeline
-Duración de la última ejecución verde de `main`: <!-- COMPLETAR: p. ej. 6 min 40 s (meta < 10 min) -->.
+Duración de la última ejecución verde de `main`: 3 min 3 s (meta < 10 min), run #7 del PR #7.
