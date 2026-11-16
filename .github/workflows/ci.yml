@@ -105,6 +105,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: reporte-sca, path: "${{ steps.grype.outputs.sarif }}", retention-days: 14 }
+      - name: Mostrar hallazgos de SCA
+        if: always()
+        run: jq -r '.runs[0].results[] | "\(.level) | \(.ruleId) | \(.message.text)"' "${{ steps.grype.outputs.sarif }}" | head -50
 
   security-secrets:
     name: 5c · Seguridad · Secretos (gitleaks, incluye historial)
