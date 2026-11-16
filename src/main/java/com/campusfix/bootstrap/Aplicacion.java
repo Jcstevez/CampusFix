@@ -41,13 +41,17 @@ public final class Aplicacion implements AutoCloseable {
             PoliticaSla sla) {
 
         public static Config porDefecto() {
-            String puerto = System.getenv().getOrDefault("PORT", "8080");
+            return desde(System.getenv());
+        }
+
+        /** Lee la configuracion de variables de entorno (12-factor); ver docs/implementacion.md. */
+        public static Config desde(java.util.Map<String, String> env) {
             return new Config(
-                    Integer.parseInt(puerto),
-                    "jdbc:h2:mem:campusfix;DB_CLOSE_DELAY=-1",
+                    Integer.parseInt(env.getOrDefault("PORT", "8080")),
+                    env.getOrDefault("JDBC_URL", "jdbc:h2:mem:campusfix;DB_CLOSE_DELAY=-1"),
                     Clock.systemUTC(),
-                    "soporte-ti@unisabana.edu.co",
-                    "mantenimiento@unisabana.edu.co",
+                    env.getOrDefault("CORREO_TI", "soporte-ti@unisabana.edu.co"),
+                    env.getOrDefault("CORREO_MANTENIMIENTO", "mantenimiento@unisabana.edu.co"),
                     PoliticaSla.porDefecto());
         }
 

@@ -7,4 +7,17 @@ services:
       - "${PORT:-8080}:${PORT:-8080}"
     environment:
       PORT: ${PORT:-8080}
+      JDBC_URL: ${JDBC_URL:-jdbc:h2:file:/data/campusfix}
+      CORREO_TI: ${CORREO_TI:-soporte-ti@unisabana.edu.co}
+      CORREO_MANTENIMIENTO: ${CORREO_MANTENIMIENTO:-mantenimiento@unisabana.edu.co}
+    volumes:
+      - campusfix-data:/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:${PORT:-8080}/salud"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+volumes:
+  campusfix-data:

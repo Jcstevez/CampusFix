@@ -1,0 +1,80 @@
+name: CD
+
+# Se ejecuta SOLO cuando el CI de main termino en verde (o a mano).
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: cd-production
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    name: 7a · Publicar imagen en GHCR (tag = SHA)
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      imagen: ${{ steps.meta.outputs.imagen }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.event.workflow_run.head_sha || github.sha }}" }
+      - id: meta
+        run: |
+          SHA="${{ github.event.workflow_run.head_sha || github.sha }}"
+          REPO=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "imagen=${REPO}:${SHA}" >> "$GITHUB_OUTPUT"
+          echo "repo=${REPO}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.imagen }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  desplegar:
+    name: 7b · Desplegar + humo + carga k6
+    needs: publicar
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.event.workflow_run.head_sha || github.sha }}" }
+      - name: Desplegar (Render Deploy Hook con imagen del SHA)
+        run: |
+          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}&imgURL=${{ needs.publicar.outputs.imagen }}"
+      - name: Esperar a que el servicio responda (plan gratis despierta lento)
+        run: |
+          for i in $(seq 1 40); do
+            curl -fsS --max-time 10 "${{ vars.APP_URL }}/salud" && exit 0
+            sleep 10
+          done
+          echo "El servicio no quedo sano"; exit 1
+      - name: Prueba de humo (flujo minimo)
+        run: |
+          set -e
+          U="${{ vars.APP_URL }}"
+          curl -fsS "$U/salud"
+          curl -fsS -o /dev/null -w "pantalla %{http_code}\n" "$U/"
+          curl -fsS -X POST "$U/seguimiento/revisar" -o /dev/null -w "revisar %{http_code}\n"
+      - name: Carga corta k6 contra el despliegue (umbrales = perf/SLO.md)
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: perf/scripts/despliegue.js
+          flags: -e BASE_URL=${{ vars.APP_URL }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reporte-k6-despliegue, path: perf/reports, retention-days: 14, if-no-files-found: ignore }

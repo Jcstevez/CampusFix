@@ -1,10 +1,16 @@
 # CampusFix
 
+[![CI](https://github.com/Jcstevez/CampusFix/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Jcstevez/CampusFix/actions/workflows/ci.yml)
+[![CD](https://github.com/Jcstevez/CampusFix/actions/workflows/cd.yml/badge.svg?branch=main)](https://github.com/Jcstevez/CampusFix/actions/workflows/cd.yml)
+
+**URL desplegada:** <!-- COMPLETAR: https://campusfix-xxxx.onrender.com --> · **Imagen:** `ghcr.io/jcstevez/campusfix`
+
 Sistema de gestión y seguimiento de incidencias universitarias (tecnología e
 infraestructura), pensado como una nueva función de la **App Sabana**
 ("Reportar alerta"). Proyecto de *Diseño y Arquitectura de Software*.
 
 - **Corte 1:** diseño con SOLID y patrones (Factory Method, Strategy, Adapter, Observer) → `docs/*.md`.
+- **Corte 3:** entrega continua y segura (Docker, CI/CD, DevSecOps, despliegue) → `docs/devops.md`, `docs/seguridad.md`, `docs/implementacion.md`.
 - **Corte 2:** retos → estilo arquitectónico (**hexagonal**) → pruebas unitarias, de integración y de carga.
 
 Interfaz de la app (maqueta): repositorio `Interfaz_Arquitectura`.
@@ -23,6 +29,13 @@ Interfaz de la app (maqueta): repositorio `Interfaz_Arquitectura`.
 | [docs/adr/ADR-001-arquitectura-hexagonal.md](docs/adr/ADR-001-arquitectura-hexagonal.md) | Comparación de 4 estilos y decisión con consecuencias |
 | [docs/diagramas/README.md](docs/diagramas/README.md) | C4: contexto, contenedores, componentes y secuencia |
 | [docs/pruebas.md](docs/pruebas.md) | Estrategia de pruebas y resultados |
+| [docs/devops.md](docs/devops.md) | Pipeline, etapas, umbrales, despliegue y rollback |
+| [docs/seguridad.md](docs/seguridad.md) | STRIDE, compuertas, hallazgos y PR bloqueado |
+| [docs/adr/ADR-002-estrategia-de-despliegue.md](docs/adr/ADR-002-estrategia-de-despliegue.md) · [ADR-003](docs/adr/ADR-003-seguridad-del-pipeline.md) | Decisiones de despliegue y seguridad |
+| [docs/diagramas/despliegue.md](docs/diagramas/despliegue.md) | Vista de despliegue C4 |
+| [docs/evolucion.md](docs/evolucion.md) | Evolución de los 3 cortes |
+| [docs/implementacion.md](docs/implementacion.md) | Guía para el equipo técnico del cliente |
+| [CHANGELOG.md](CHANGELOG.md) | Versiones |
 | [perf/SLO.md](perf/SLO.md) · [perf/README.md](perf/README.md) | SLO y ejecución de las pruebas de carga |
 
 ## Cómo ejecutar
@@ -94,3 +107,26 @@ src/test/java/com/campusfix   pruebas unitarias (*Test) e integración (*IT) + s
 perf/                         SLO, scripts k6 y reportes
 docs/                         arquitectura, ADR, diagramas, pruebas y documentos del Corte 1
 ```
+
+## Con Docker
+
+```bash
+cp .env.example .env
+docker compose up --build     # http://localhost:8080  (healthcheck en /salud)
+```
+
+## Pipeline y trazabilidad
+
+Detalle en [docs/devops.md](docs/devops.md). Cada etapa es un check requerido en `main` (PR + 1 aprobación).
+
+| Requisito / atributo | Reto | Prueba o regla | Etapa del pipeline | Umbral que detiene el pipeline |
+|---|---|---|---|---|
+| Calidad del dominio | 1–3 | Unitarias + JaCoCo | 2 · `unit-tests` | Cobertura de líneas del dominio < 70 % o test rojo |
+| Flujo completo por HTTP/BD/QR | 1–3 | `FlujoHttpIT` y demás IT | 3 · `integration-tests` | Cualquier IT rojo |
+| Hexagonal (ADR-001) | — | `ArquitecturaTest` | 4 · `architecture` | Regla de dependencia violada |
+| Código seguro | — | Semgrep | 5a · `security-sast` | Hallazgo ERROR |
+| Dependencias seguras | — | Grype | 5b · `security-sca` | CVE alta/crítica con parche |
+| Sin secretos | — | gitleaks | 5c · `security-secrets` | Cualquier secreto |
+| Imagen segura | — | Grype imagen | 6 · `image` | CVE crítica con parche |
+| Rendimiento (SLO) | 1–3 | k6 `despliegue.js` | 7b · `desplegar` | `p95 ≥ 500 ms` o errores ≥ 1 % |
+| Disponibilidad | — | Smoke `/salud` | 7b · `desplegar` | Respuesta ≠ 2xx |
