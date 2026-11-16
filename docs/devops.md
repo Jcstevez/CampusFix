@@ -49,7 +49,7 @@ Se abrio el PR #20 (https://github.com/Jcstevez/CampusFix/pull/20), que agrega e
 * **Despliegue automático:** `cd.yml` se dispara cuando el CI de `main` termina en verde. Llama al *Deploy Hook* de Render con `imgURL=<imagen:SHA>`. Ver ADR-002.
 * **Secretos:** `RENDER_DEPLOY_HOOK_URL` es un *secret* del Environment `production`; `APP_URL` es una *variable* del mismo Environment. Nada sensible está en el repositorio ni en el historial (lo verifica gitleaks).
 * **Smoke + carga:** tras el despliegue se espera `/salud`, se ejecuta el humo y un k6 corto de 30 s con umbrales del SLO (`http_req_failed<1 %`, `p95<500 ms`).
-* **Rollback:** workflow `Rollback` (manual) → `Actions → Rollback → Run workflow → version = <SHA o vX.Y.Z anterior>`; vuelve a desplegar esa imagen y verifica `/salud`. Se ejecutó una vez como evidencia: <!-- COMPLETAR: enlace a la ejecución -->.
+* **Rollback:** workflow `Rollback` (manual) → `Actions → Rollback → Run workflow → version = <SHA o vX.Y.Z anterior>`; vuelve a desplegar esa imagen y verifica `/salud`. Se ejecutó una vez como evidencia: [Rollback #1](https://github.com/Jcstevez/CampusFix/actions/runs/43961398035).
 
 ## 4. Flujo de trabajo (GitHub Flow)
 Ramas cortas `feature/*`, `fix/*` → Pull Request a `main` → checks verdes + **1 aprobación de otro integrante** → *squash merge*. `main` está protegida (Settings → Branches). Versionado semántico con tags `vMAJOR.MINOR.PATCH`; cambios en `CHANGELOG.md`.

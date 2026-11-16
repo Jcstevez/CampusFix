@@ -31,10 +31,17 @@
 | Valor atípico de 52,9 s sin explicar | Se vigila con k6 de despliegue (umbral p95) |
 
 ## 5. Retroalimentación del profesor (Corte 2)
-<!-- COMPLETAR: pegar la retroalimentación recibida y, por cada punto, qué se hizo o por qué no -->
+Calificación del Corte 2: **81,5/90** en la rúbrica y **9,73/10** en la evaluación entre pares (equivalente a **91,23/100**).
+
 | Comentario del profesor | Respuesta |
 |---|---|
-| | |
+| Proceso: integración sin control de calidad ni revisión | **Resuelto en el Corte 3.** Flujo con ramas y PR, rama `main` protegida (ruleset: PR + 1 aprobación + 8 checks obligatorios, sin force push), aprobaciones de otros integrantes (PR #7 y #21). |
+| Despliegue manual | **Resuelto.** CD automático tras CI verde (workflow `cd.yml`), con smoke test y prueba de carga k6, más rollback manual probado y Release v1.0.0. |
+| Paquete `strategy` con código sin uso | **No resuelto.** Se declara como límite; no se alcanzó a refactorizar. |
+| Falta prueba end-to-end del flujo de mantenimiento | **No resuelto.** Se declara como límite. |
+| Precisión del clasificador | **No resuelto.** Sin mediciones nuevas; se declara como límite. |
+| Prueba de punto de quiebre y decodificación de QR bajo carga | **No resuelto.** Solo se midió carga sostenida con k6 sobre `/salud` y `/`. |
+| Mutantes no reproducibles; valor atípico de 52,9 s | **No resuelto.** No se reprodujo; se declara sin inventar datos. |
 
 ## 6. Límites finales
 Sin SSO/roles; correo simulado; datos en H2 (efímeros en el plan gratis de Render); una sola instancia (indisponibilidad breve al desplegar); el seguimiento de plazos no es automático.

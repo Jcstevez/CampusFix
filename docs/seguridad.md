@@ -25,14 +25,15 @@ Contenedores: **Navegador/App Sabana** → (HTTPS) → **CampusFix (JVM, HTTP + 
 | Imagen | CVE crítica con parche | job `image`, `reporte-imagen` |
 
 ## 3. Hallazgos y tratamiento
-<!-- COMPLETAR tras la primera ejecución: una fila por hallazgo real de los reportes. Estados válidos: corregido / falso positivo (con justificación) / riesgo aceptado (con justificación) -->
 | Fecha | Herramienta | Hallazgo | Severidad | Estado | Justificación / commit |
 |---|---|---|---|---|---|
 | 2026-11-16 | Grype (SCA) | Varios GHSA high en jackson-databind y jackson-core 2.16.1 | High | Corregido | Jackson 2.16.1 a 2.21.7 en pom.xml (PR #7) |
 
 ## 4. Demostración: PR inseguro bloqueado
 Se abrió un PR deliberadamente inseguro (agregando la dependencia `org.apache.logging.log4j:log4j-core:2.14.1`, vulnerable a Log4Shell CVE-2021-44228); la compuerta SCA lo bloqueó y **se cerró sin integrar**.
-PR: <!-- COMPLETAR: enlace al PR cerrado --> · Ejecución fallida: <!-- COMPLETAR: enlace al run -->.
+PR: [#22](https://github.com/Jcstevez/CampusFix/pull/22) (cerrado sin integrar) · Ejecución fallida: [job 5b](https://github.com/Jcstevez/CampusFix/actions/runs/43964396752/job/133639884224).
+
+Resultado de Grype sobre log4j-core 2.14.1: **2 críticas, 1 alta y 6 medias**. El job 5b falló con `Found vulnerabilities with level 'high' or higher` y el job 6 (imagen Docker) también falló. Además, la regla de protección exigía 1 aprobación, así que el PR no se podía integrar.
 
 ## 5. Cómo se tratan los hallazgos nuevos
 1. Dependabot/alerta → PR de corrección. 2. Si es falso positivo: se documenta aquí con evidencia. 3. Si no hay parche: riesgo aceptado con responsable y fecha de revisión.
