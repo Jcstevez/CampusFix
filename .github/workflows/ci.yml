@@ -116,10 +116,10 @@ jobs:
       - name: Instalar gitleaks (binario con checksum)
         run: |
           V=8.21.2
-          curl -sSfL -o g.tgz https://github.com/gitleaks/gitleaks/releases/download/v${V}/gitleaks_${V}_linux_x64.tar.gz
+          curl -sSfLO https://github.com/gitleaks/gitleaks/releases/download/v${V}/gitleaks_${V}_linux_x64.tar.gz
           curl -sSfL -o checksums.txt https://github.com/gitleaks/gitleaks/releases/download/v${V}/gitleaks_${V}_checksums.txt
           grep "gitleaks_${V}_linux_x64.tar.gz" checksums.txt | sha256sum -c -
-          tar -xzf g.tgz gitleaks
+          tar -xzf gitleaks_${V}_linux_x64.tar.gz gitleaks
       # --log-opts=HEAD: historial de la rama que se va a integrar. Cualquier secreto => exit 1
       - run: ./gitleaks detect --source . --log-opts="HEAD" --redact --report-format sarif --report-path gitleaks.sarif --exit-code 1
       - uses: actions/upload-artifact@v4
