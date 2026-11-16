@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Etapa 1: compilar con Maven y reunir las librerias de ejecucion
-FROM maven:3.9.16-eclipse-temurin-21-noble AS build
+FROM maven:3.9-eclipse-temurin-26-noble AS build
 WORKDIR /src
 COPY pom.xml .
 RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp -q dependency:go-offline
