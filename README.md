@@ -3,7 +3,7 @@
 [![CI](https://github.com/Jcstevez/CampusFix/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Jcstevez/CampusFix/actions/workflows/ci.yml)
 [![CD](https://github.com/Jcstevez/CampusFix/actions/workflows/cd.yml/badge.svg?branch=main)](https://github.com/Jcstevez/CampusFix/actions/workflows/cd.yml)
 
-**URL desplegada:** <!-- COMPLETAR: https://campusfix-xxxx.onrender.com --> · **Imagen:** `ghcr.io/jcstevez/campusfix`
+**URL desplegada:** https://campusfix-chbc.onrender.com · **Imagen:** `ghcr.io/jcstevez/campusfix`
 
 Sistema de gestión y seguimiento de incidencias universitarias (tecnología e
 infraestructura), pensado como una nueva función de la **App Sabana**

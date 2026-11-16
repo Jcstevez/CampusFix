@@ -41,6 +41,9 @@ Los jobs 2–6 corren en paralelo para que el pipeline dure < 10 min (caché de 
 ### Reglas de arquitectura como prueba (etapa 4)
 `ArquitecturaTest` exige, entre otras: (R1) el dominio no depende de `application`, `adapter` ni `bootstrap`; (R2) el dominio y la aplicación no importan tecnología (HTTP, JDBC, Jackson, ZXing); (R3) `adapter.in` no depende de `adapter.out` y viceversa; (R4) ningún adaptador depende de `bootstrap`. Son las reglas de dependencia declaradas en `docs/adr/ADR-001-arquitectura-hexagonal.md`.
 
+### Evidencia: PR bloqueado por la regla de arquitectura
+Se abrio el PR #20 (https://github.com/Jcstevez/CampusFix/pull/20), que agrega en `Prioridad.java` (dominio) un `import` de `com.campusfix.application.Canal`. El job 4 fallo con `ArquitecturaTest.elNucleoNoDependeDeAplicacionAdaptadoresNiBootstrap`: "El paquete domain rompe la regla de dependencia ... Prioridad.java -> com.campusfix.application.Canal" (Tests run: 8, Failures: 1). Run: https://github.com/Jcstevez/CampusFix/actions/runs/43943987618. El PR se cerro sin integrar y `main` no cambio.
+
 ## 3. Entrega y despliegue
 * **Imagen:** se publica en GHCR etiquetada con el **SHA** del commit (nunca solo `latest`); al crear un tag `vX.Y.Z` (`release.yml`) se publica además con la versión y se crea el Release en GitHub.
 * **Despliegue automático:** `cd.yml` se dispara cuando el CI de `main` termina en verde. Llama al *Deploy Hook* de Render con `imgURL=<imagen:SHA>`. Ver ADR-002.
