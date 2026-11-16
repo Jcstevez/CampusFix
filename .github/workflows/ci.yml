@@ -95,7 +95,7 @@ jobs:
         with: { distribution: temurin, java-version: '21', cache: maven }
       - run: mvn -B -ntp -DskipTests package dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=runtime
       - id: grype
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           path: target/lib
           fail-build: true
@@ -145,7 +145,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - id: scan
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           image: campusfix:ci
           fail-build: true
