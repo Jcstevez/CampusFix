@@ -157,6 +157,6 @@ jobs:
         with: { name: reporte-imagen, path: "${{ steps.scan.outputs.sarif }}", retention-days: 14 }
       - name: Humo local de la imagen
         run: |
-          docker run -d --name t -p 8080:8080 campusfix:ci
+          docker run -d --name campusfix-ci -p 8080:8080 campusfix:ci
           for i in $(seq 1 30); do curl -fsS localhost:8080/salud && exit 0; sleep 2; done
-          docker logs t; exit 1
+          docker logs campusfix-ci; exit 1
