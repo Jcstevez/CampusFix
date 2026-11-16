@@ -1,0 +1,159 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 1 · Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21', cache: maven }
+      - run: mvn -B -ntp -DskipTests package dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=runtime
+      - uses: actions/upload-artifact@v4
+        with: { name: build-output, path: "target/*.jar\ntarget/lib", retention-days: 7 }
+
+  unit-tests:
+    name: 2 · Pruebas unitarias + cobertura dominio >= 70 %
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21', cache: maven }
+      # verify = unitarias + integracion + JaCoCo check (umbral 70 % de lineas del dominio)
+      - run: mvn -B -ntp verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reportes-pruebas-y-cobertura
+          path: |
+            target/surefire-reports
+            target/failsafe-reports
+            target/site/jacoco
+          retention-days: 14
+
+  integration-tests:
+    name: 3 · Pruebas de integracion
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21', cache: maven }
+      - run: mvn -B -ntp verify -Dtest=NoExiste -Dsurefire.failIfNoSpecifiedTests=false -Djacoco.skip=true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reportes-integracion, path: target/failsafe-reports, retention-days: 14 }
+
+  architecture:
+    name: 4 · Reglas de arquitectura (ADR-001)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21', cache: maven }
+      - run: mvn -B -ntp test -Dtest=ArquitecturaTest -Djacoco.skip=true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reporte-arquitectura, path: target/surefire-reports, retention-days: 14 }
+
+  security-sast:
+    name: 5a · Seguridad · SAST (Semgrep)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container: { image: semgrep/semgrep:1.97.0 }
+    steps:
+      - uses: actions/checkout@v4
+      # Falla si hay hallazgos ERROR (alta/critica). Los tratados estan en .semgrepignore / docs/seguridad.md
+      - run: semgrep scan --config p/java --config p/owasp-top-ten --severity ERROR --error --sarif --output semgrep.sarif src
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reporte-sast, path: semgrep.sarif, retention-days: 14 }
+
+  security-sca:
+    name: 5b · Seguridad · SCA (Grype sobre dependencias)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21', cache: maven }
+      - run: mvn -B -ntp -DskipTests package dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=runtime
+      - id: grype
+        uses: anchore/scan-action@v6
+        with:
+          path: target/lib
+          fail-build: true
+          severity-cutoff: high
+          only-fixed: true
+          output-format: sarif
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reporte-sca, path: "${{ steps.grype.outputs.sarif }}", retention-days: 14 }
+
+  security-secrets:
+    name: 5c · Seguridad · Secretos (gitleaks, incluye historial)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Instalar gitleaks (binario con checksum)
+        run: |
+          V=8.21.2
+          curl -sSfL -o g.tgz https://github.com/gitleaks/gitleaks/releases/download/v${V}/gitleaks_${V}_linux_x64.tar.gz
+          curl -sSfL -o checksums.txt https://github.com/gitleaks/gitleaks/releases/download/v${V}/gitleaks_${V}_checksums.txt
+          grep "gitleaks_${V}_linux_x64.tar.gz" checksums.txt | sha256sum -c -
+          tar -xzf g.tgz gitleaks
+      # --log-opts=HEAD: historial de la rama que se va a integrar. Cualquier secreto => exit 1
+      - run: ./gitleaks detect --source . --log-opts="HEAD" --redact --report-format sarif --report-path gitleaks.sarif --exit-code 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reporte-secretos, path: gitleaks.sarif, retention-days: 14 }
+
+  image:
+    name: 6 · Imagen Docker + escaneo (Grype)
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: campusfix:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - id: scan
+        uses: anchore/scan-action@v6
+        with:
+          image: campusfix:ci
+          fail-build: true
+          severity-cutoff: critical
+          only-fixed: true
+          output-format: sarif
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reporte-imagen, path: "${{ steps.scan.outputs.sarif }}", retention-days: 14 }
+      - name: Humo local de la imagen
+        run: |
+          docker run -d --name t -p 8080:8080 campusfix:ci
+          for i in $(seq 1 30); do curl -fsS localhost:8080/salud && exit 0; sleep 2; done
+          docker logs t; exit 1

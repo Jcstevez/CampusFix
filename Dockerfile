@@ -10,11 +10,13 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp -q package -DskipTests \
  && mvn -B -ntp -q dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=runtime
 
 # Etapa 2: imagen final solo con el JRE, el jar y las librerias
-FROM eclipse-temurin:21.0.12.1_1-jre-noble
+FROM eclipse-temurin:21-jre-noble
 RUN groupadd --system app && useradd --system --gid app --no-create-home app
 WORKDIR /app
 COPY --from=build --chown=app:app /src/target/campusfix-1.0-SNAPSHOT.jar app.jar
 COPY --from=build --chown=app:app /src/target/lib ./lib
+RUN mkdir /data && chown app:app /data
+VOLUME /data
 USER app
 EXPOSE 8080
 

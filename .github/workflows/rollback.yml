@@ -1,0 +1,31 @@
+name: Rollback
+
+# Vuelve a desplegar una version anterior (tag de imagen = SHA o vX.Y.Z) y verifica.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag de la imagen a restaurar (SHA completo o v1.0.0)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - name: Re-desplegar la imagen indicada
+        run: |
+          REPO=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}&imgURL=${REPO}:${{ inputs.version }}"
+      - name: Verificar salud
+        run: |
+          sleep 20
+          for i in $(seq 1 40); do
+            curl -fsS --max-time 10 "${{ vars.APP_URL }}/salud" && exit 0
+            sleep 10
+          done
+          exit 1
