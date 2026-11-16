@@ -25,7 +25,7 @@
         <jackson.version>2.21.7</jackson.version>
         <zxing.version>3.5.3</zxing.version>
         <h2.version>2.3.232</h2.version>
-        <jacoco.version>0.8.13</jacoco.version>
+        <jacoco.version>0.8.16</jacoco.version>
     </properties>
 
     <dependencies>
