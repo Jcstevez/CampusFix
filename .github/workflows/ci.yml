@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '21', cache: maven }
       - run: mvn -B -ntp -DskipTests package dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=runtime
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '21', cache: maven }
       # verify = unitarias + integracion + JaCoCo check (umbral 70 % de lineas del dominio)
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '21', cache: maven }
       - run: mvn -B -ntp verify -Dtest=NoExiste -Dsurefire.failIfNoSpecifiedTests=false -Djacoco.skip=true
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '21', cache: maven }
       - run: mvn -B -ntp test -Dtest=ArquitecturaTest -Djacoco.skip=true
@@ -78,7 +78,7 @@ jobs:
     timeout-minutes: 10
     container: { image: semgrep/semgrep:1.97.0 }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Falla si hay hallazgos ERROR (alta/critica). Los tratados estan en .semgrepignore / docs/seguridad.md
       - run: semgrep scan --config p/java --config p/owasp-top-ten --severity ERROR --error --sarif --output semgrep.sarif src
       - uses: actions/upload-artifact@v4
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '21', cache: maven }
       - run: mvn -B -ntp -DskipTests package dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=runtime
@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - name: Instalar gitleaks (binario con checksum)
         run: |
@@ -135,7 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v3
       - uses: docker/build-push-action@v6
         with:
