@@ -11,6 +11,10 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp -q package -DskipTests \
 
 # Etapa 2: imagen final solo con el JRE, el jar y las librerias
 FROM eclipse-temurin:21-jre-noble
+# Aplica los parches de seguridad del sistema operativo (glibc, perl-base; ver docs/seguridad.md)
+RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system app && useradd --system --gid app --no-create-home app
 WORKDIR /app
 COPY --from=build --chown=app:app /src/target/campusfix-1.0-SNAPSHOT.jar app.jar
