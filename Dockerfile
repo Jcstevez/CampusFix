@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp -q package -DskipTests \
  && mvn -B -ntp -q dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=runtime
 
 # Etapa 2: imagen final solo con el JRE, el jar y las librerias
-FROM eclipse-temurin:21-jre-noble
+FROM eclipse-temurin:25-jre-noble
 # Aplica los parches de seguridad del sistema operativo (glibc, perl-base; ver docs/seguridad.md)
 RUN apt-get update \
  && apt-get upgrade -y --no-install-recommends \
