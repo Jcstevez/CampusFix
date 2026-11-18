@@ -30,7 +30,7 @@ class ArquitecturaTest {
 
     private static final Path RAIZ = Path.of("src/main/java/com/campusfix");
     private static final Pattern IMPORT =
-            Pattern.compile("^import\\s+(?:static\\s+)?([\\w.]+)\\s*;", Pattern.MULTILINE);
+            Pattern.compile("^import\\s+(?:static\\s+)?([\\w.]+(?:\\.\\*)?)\\s*;", Pattern.MULTILINE);
 
     private static final List<String> TECNOLOGIA = List.of(
             "java.sql", "javax.sql", "com.sun.net", "com.fasterxml",

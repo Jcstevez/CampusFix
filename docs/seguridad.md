@@ -4,16 +4,17 @@
 
 Contenedores: **Navegador/App Sabana** → (HTTPS) → **CampusFix (JVM, HTTP + casos de uso)** → **H2 (JDBC)**; salidas simuladas a **Correo/Alertas**; y la **cadena de entrega** (GitHub → GHCR → Render).
 
-| # | Amenaza (STRIDE) | Dónde | Impacto | Mitigación / estado |
-|---|---|---|---|---|
-| 1 | **S**poofing — suplantar a un usuario o al personal (no hay autenticación) | Navegador → API | Reportar o revisar a nombre de otro | **Riesgo aceptado en v1.0** (uso piloto); en producción se integra con el SSO de La Sabana (ver `implementacion.md` §9). Mitigación parcial: la app no expone datos personales |
-| 2 | **T**ampering — modificar incidencias o endpoints de gestión (`/seguimiento/revisar`) sin autorización (**authZ**) | API | Escalar/alterar casos | **Riesgo aceptado** (sin roles); recomendación: token de personal o rol en el SSO. Entrada validada y JDBC con `PreparedStatement` (sin inyección SQL) |
-| 3 | **R**epudiation — negar haber reportado/escalado | API/BD | Sin trazabilidad | Cada incidencia guarda fecha y estado; las notificaciones quedan en bandeja auditable (`/notificaciones`) |
-| 4 | **I**nformation disclosure — secretos o datos en repo, logs o imagen | Repo, imagen | Fuga de credenciales | gitleaks sobre historial; secretos solo en GitHub Secrets; `.env` ignorado; imagen sin herramientas de build |
-| 5 | **D**enial of service — inundar la API | API | Caída del servicio | SLO y pruebas de carga/estrés (`perf/`); límite de memoria de JVM; healthcheck + reinicio `unless-stopped` |
-| 6 | **E**levation of privilege — contenedor ejecutándose como root | Contenedor | Compromiso del host | Imagen con usuario `app` no root; escaneo de imagen |
-| 7 | **T**ampering — dependencia o acción de CI comprometida (cadena de suministro) | Pipeline | Código malicioso en producción | SCA (Grype), Dependabot, SHA de herramientas verificado, sin Trivy (ADR-003), permisos mínimos |
-| 8 | **I**nformation disclosure — tráfico sin cifrar | Navegador ↔ API | Lectura de reportes | HTTPS terminado por Render en producción |
+| # | Amenaza (STRIDE) | Componente o flujo | Impacto | Mitigación / estado | Cómo se verifica |
+|---|---|---|---|---|---|
+| 1 | **S**poofing — suplantar a un estudiante o al personal (no hay autenticación) | Navegador/App Sabana → API `POST /incidencias` | Reportar o revisar a nombre de otro | **Riesgo aceptado en v1.0** (piloto); en producción, SSO de La Sabana (`implementacion.md` §9). La app no expone datos personales | Declarado en §3 como riesgo aceptado; sin verificación automática (no hay usuarios aún) |
+| 2 | **T**ampering / **E**levación — cambiar estados (`/atender`, `/resolver`) o forzar `/seguimiento/revisar` sin rol (**authZ**) | API → `GestionarIncidenciasUseCase`, `SeguimientoService` | Escalar o cerrar casos ajenos | **Riesgo aceptado** (sin roles); recomendación: token de personal o rol del SSO | Riesgo aceptado registrado en §3; pendiente: IT que espere 401/403 |
+| 3 | **T**ampering — inyección SQL en el texto del reporte | API → `IncidenciaRepositorioJdbc` → H2 | Alterar/borrar la BD | `PreparedStatement` en todas las consultas; validación de entrada | SAST Semgrep (`p/owasp-top-ten`, reglas de SQLi) en el job 5a; `IncidenciaRepositorioJdbcIT` |
+| 4 | **R**epudiation — negar haber reportado o escalado | API → H2 / bandeja de notificaciones | Sin trazabilidad | Cada incidencia guarda fecha y estado; avisos en bandeja auditable (`/notificaciones`) | `FlujoHttpIT` verifica la notificación generada por cada reporte |
+| 5 | **I**nformation disclosure — secretos (Deploy Hook de Render) en repo, logs o imagen | Repositorio Git, imagen Docker, GitHub Actions | Despliegues no autorizados | Secreto solo en Environment `production`; `.env` en `.gitignore` y `.dockerignore` | gitleaks sobre todo el historial (job 5c) + Grype de imagen (job 6) |
+| 6 | **D**enial of service — inundar `POST /incidencias/qr` (decodificar imágenes es costoso) | Internet → Render → contenedor | Caída del servicio | `-XX:MaxRAMPercentage`, healthcheck + reinicio; SLO medido | k6 post-despliegue con umbrales p95 < 500 ms y errores < 1 % (job 7b) |
+| 7 | **E**levation of privilege — escapar del contenedor si corre como root | Contenedor `campusfix` en Render | Compromiso del host | `USER app` no root; imagen JRE mínima | Humo de la imagen en el job 6 corre con el usuario `app`; Grype de imagen (crítica con parche) |
+| 8 | **T**ampering — dependencia o acción de CI comprometida (cadena de suministro) | Maven Central / GitHub Actions → imagen | Código malicioso en producción | SCA Grype, Dependabot, checksum del binario de gitleaks, permisos mínimos, sin Trivy (ADR-003) | Job 5b (alta/crítica con parche) y PR #22 bloqueado (log4j 2.14.1) |
+| 9 | **I**nformation disclosure — tráfico sin cifrar | Navegador ↔ Render | Lectura de reportes | HTTPS terminado por Render | Prueba de humo y k6 usan la URL `https://` de `APP_URL` |
 
 ## 2. Compuertas de calidad (quality gates)
 
