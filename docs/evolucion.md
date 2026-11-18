@@ -40,7 +40,7 @@ Calificación del Corte 2: **81,5/90** en la rúbrica y **9,73/10** en la evalua
 | Paquete `strategy` con código sin uso | **No resuelto.** Se declara como límite; no se alcanzó a refactorizar. |
 | Falta prueba end-to-end del flujo de mantenimiento | **No resuelto.** Se declara como límite. |
 | Precisión del clasificador | **No resuelto.** Sin mediciones nuevas; se declara como límite. |
-| Prueba de punto de quiebre y decodificación de QR bajo carga | **No resuelto.** Solo se midió carga sostenida con k6 sobre `/salud` y `/`. |
+| Prueba de punto de quiebre y decodificación de QR bajo carga | **Parcial.** Desde el Corte 3 el k6 post-despliegue (`perf/scripts/despliegue.js`) mide `POST /incidencias`, `POST /incidencias/qr`, `GET /incidencias/:id` y `POST /seguimiento/revisar` con los umbrales del SLO del Corte 2 en cada despliegue. El punto de quiebre sigue sin medirse. |
 | Mutantes no reproducibles; valor atípico de 52,9 s | **No resuelto.** No se reprodujo; se declara sin inventar datos. |
 
 ## 6. Límites finales
